@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#0f1c18" />
+    <meta name="theme-color" content="#ff4d55" />
     <meta
       name="description"
       content="PulsePlan creates beginner and advanced exercise plans with simple nutrition ideas based on your profile."
@@ -14,9 +14,20 @@
     <title>PulsePlan</title>
   </head>
   <body>
+    <div class="splash-screen" id="splashScreen" aria-label="PulsePlan loading">
+      <div class="splash-logo" aria-hidden="true">
+        <svg viewBox="0 0 96 96">
+          <path class="heart-outline" d="M48 81 18 51.5C7.8 41.5 7.4 25.6 16.9 16.8c8.8-8.1 21.7-6.1 28.6 2.9 6.9-9 19.8-11 28.6-2.9 9.5 8.8 9.1 24.7-1.1 34.7L48 81Z" />
+          <path class="heart-pulse" d="M17 48h22l6.2-15 8.8 30 6.4-15H79" />
+        </svg>
+      </div>
+      <div class="splash-wordmark"><strong>Pulse</strong><em>Plan</em></div>
+      <div class="splash-loader" aria-hidden="true"><span></span></div>
+    </div>
+
     <div class="app-shell">
       <header class="topbar">
-        <a class="brand" href="#top" aria-label="PulsePlan home">
+        <a class="brand" href="#landing" data-screen-target="landing" aria-label="PulsePlan home">
           <span class="brand-mark" aria-hidden="true">
             <svg viewBox="0 0 40 40" role="img">
               <path class="heart-outline" d="M20 34 7.5 21.7C3.2 17.5 3 10.8 7 7.1c3.7-3.4 9.1-2.6 12 1.2 2.9-3.8 8.3-4.6 12-1.2 4 3.7 3.8 10.4-.5 14.6L20 34Z" />
@@ -26,21 +37,25 @@
           <span><strong>Pulse</strong><em>Plan</em></span>
         </a>
         <nav class="nav-links" aria-label="Primary navigation">
-          <a href="#plan" data-tab-target="tab-weekly">
+          <a href="#setup" data-screen-target="setup">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></svg>
+            New plan
+          </a>
+          <a href="#load" data-screen-target="load">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M7 4h10v16H7zM10 8h4M10 12h4M10 16h2" /></svg>
+            Load plan
+          </a>
+          <a href="#plan" data-screen-target="plan" data-tab-target="tab-weekly">
             <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M7 4h10v16H7zM10 8h4M10 12h4M10 16h2" /></svg>
             Plan
           </a>
-          <a href="#plan" data-tab-target="tab-examples">
+          <a href="#plan" data-screen-target="plan" data-tab-target="tab-examples">
             <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 15h4V9H4v6Zm6 2h4V7h-4v10Zm6 3h4V4h-4v16Z" /></svg>
             Progress
           </a>
-          <a href="#plan" data-tab-target="tab-recipes">
+          <a href="#plan" data-screen-target="plan" data-tab-target="tab-recipes">
             <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 10c0 5 4 8 8 8 3 0 6-2 6-6 0-5-5-8-10-8M8 6c0 2-1 3-3 4" /></svg>
             Nutrition
-          </a>
-          <a href="#profilePanel">
-            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-7 8a7 7 0 0 1 14 0" /></svg>
-            Profile
           </a>
         </nav>
         <button class="ghost-button install-button" id="installButton" type="button">
@@ -51,8 +66,52 @@
         </button>
       </header>
 
-      <main id="top" class="workspace">
-        <section class="onboarding-panel" aria-labelledby="formTitle">
+      <main id="top" class="screen-stack">
+        <section class="screen landing-screen active" id="landingScreen" aria-labelledby="landingTitle">
+          <div class="landing-hero">
+            <div class="landing-copy">
+              <div class="landing-mark" aria-hidden="true">
+                <svg viewBox="0 0 96 96">
+                  <path class="icon-outline" d="M48 81 18 51.5C7.8 41.5 7.4 25.6 16.9 16.8c8.8-8.1 21.7-6.1 28.6 2.9 6.9-9 19.8-11 28.6-2.9 9.5 8.8 9.1 24.7-1.1 34.7L48 81Z" />
+                  <path class="icon-accent" d="M17 48h22l6.2-15 8.8 30 6.4-15H79" />
+                </svg>
+              </div>
+              <h1 id="landingTitle">Your plan, ready when you are.</h1>
+              <p>
+                Start fresh with a guided setup, or jump straight back into a
+                saved PulsePlan on this device.
+              </p>
+              <div class="landing-actions">
+                <button class="primary-button accent-button" type="button" data-screen-target="setup">
+                  <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></svg>
+                  Start new plan
+                </button>
+                <button class="ghost-button" id="landingLoadButton" type="button" data-screen-target="load">
+                  <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M7 4h10v16H7zM10 8h4M10 12h4M10 16h2" /></svg>
+                  Load plan
+                </button>
+              </div>
+              <small id="landingSavedMeta">No saved plans yet</small>
+            </div>
+            <div class="landing-icons" aria-label="PulsePlan features">
+              <div><svg viewBox="0 0 48 48"><path class="icon-outline" d="M8 24h7m18 0h7M15 16v16m18-16v16M19 20h10m-10 8h10" /><path class="icon-accent" d="M19 24h10" /></svg><span>Workouts</span></div>
+              <div><svg viewBox="0 0 48 48"><path class="icon-outline" d="M11 12h26v27H11zM17 8v8m14-8v8M16 23h3m5 0h3m5 0h3M16 31h3m5 0h3m5 0h3" /><path class="icon-accent" d="M24 31h3" /></svg><span>Schedule</span></div>
+              <div><svg viewBox="0 0 48 48"><path class="icon-outline" d="M13 35V25m10 10V17m10 18V10" /><path class="icon-accent" d="M39 35V6" /></svg><span>Progress</span></div>
+              <div><svg viewBox="0 0 48 48"><path class="icon-outline" d="M24 42 9 27.4C3.8 22.3 3.6 14.4 8.5 10c4.4-4 11-3.1 14.5 1.5C26.5 6.9 33.1 6 37.5 10c4.9 4.4 4.7 12.3-.5 17.4L24 42Z" /><path class="icon-accent" d="M9 25h10l3-7 4 13 3-6h10" /></svg><span>Profile</span></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen setup-screen hidden" id="setupScreen" aria-labelledby="formTitle">
+          <div class="screen-toolbar">
+            <button class="ghost-button" type="button" data-screen-target="landing">
+              <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6" /></svg>
+              Back
+            </button>
+            <span>New plan setup</span>
+          </div>
+
+          <div class="onboarding-panel">
           <div class="panel-heading">
             <h1 id="formTitle">Build a plan you can actually follow.</h1>
             <p>
@@ -192,9 +251,51 @@
             clinical advice before changing activity or diet if you have a
             health condition, injury, pregnancy, or medication concern.
           </p>
+          </div>
         </section>
 
-        <section class="results-panel" id="plan" aria-live="polite">
+        <section class="screen load-screen hidden" id="loadScreen" aria-labelledby="loadTitle">
+          <div class="screen-toolbar">
+            <button class="ghost-button" type="button" data-screen-target="landing">
+              <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6" /></svg>
+              Back
+            </button>
+            <span>Saved plans</span>
+          </div>
+          <div class="load-panel">
+            <div class="load-heading">
+              <div>
+                <span class="section-kicker">Load a profile</span>
+                <h1 id="loadTitle">Pick up where you left off.</h1>
+              </div>
+              <button class="primary-button accent-button" type="button" data-screen-target="setup">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></svg>
+                New plan
+              </button>
+            </div>
+            <div class="saved-library" id="savedPlansLibrary"></div>
+          </div>
+        </section>
+
+        <section class="screen plan-screen hidden" id="planScreen" aria-live="polite" aria-labelledby="planTitle">
+          <div class="screen-toolbar">
+            <button class="ghost-button" type="button" data-screen-target="landing">
+              <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6" /></svg>
+              Home
+            </button>
+            <div class="toolbar-actions">
+              <button class="ghost-button" type="button" data-screen-target="setup">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m4 14 5-5 4 4 7-8M4 20h16" /></svg>
+                Edit setup
+              </button>
+              <button class="ghost-button" type="button" data-screen-target="load">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M7 4h10v16H7zM10 8h4M10 12h4M10 16h2" /></svg>
+                Load
+              </button>
+            </div>
+          </div>
+
+          <div class="results-panel" id="plan">
           <div class="result-hero">
             <div>
               <h2 id="planTitle">Your 8-week foundation plan</h2>
@@ -285,6 +386,7 @@
             and diet variety ideas from
             <a href="https://www.myplate.gov/web/tip-sheet/enjoy-vegetarian-meals" target="_blank" rel="noreferrer">MyPlate</a>.
           </aside>
+          </div>
         </section>
       </main>
     </div>

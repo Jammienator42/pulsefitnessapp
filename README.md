@@ -5,10 +5,11 @@ PulsePlan is an installable progressive web app that creates beginner and advanc
 ## Features
 
 - Gender, experience, height, weight, diet, units, and plan-length selections
+- Animated splash screen with a start/load landing flow
 - Tailored weekly workout schedule
 - Exercise examples for the selected level
 - Diet-aware recipe suggestions
-- Local profile naming and saved plans
+- Local profile naming with saved plan loading and deletion
 - PWA manifest, service worker, offline cache, install prompt, and local profile persistence
 
 ## Run Locally

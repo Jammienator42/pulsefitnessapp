@@ -1,4 +1,11 @@
 const form = document.querySelector("#planForm");
+const splashScreen = document.querySelector("#splashScreen");
+const screens = {
+  landing: document.querySelector("#landingScreen"),
+  setup: document.querySelector("#setupScreen"),
+  load: document.querySelector("#loadScreen"),
+  plan: document.querySelector("#planScreen")
+};
 const weeksInput = document.querySelector("#weeks");
 const weeksOutput = document.querySelector("#weeksOutput");
 const metricInputs = document.querySelector("#metricInputs");
@@ -17,6 +24,8 @@ const profileNameLabel = document.querySelector("#profileNameLabel");
 const savedCount = document.querySelector("#savedCount");
 const savePlanButton = document.querySelector("#savePlanButton");
 const savedPlans = document.querySelector("#savedPlans");
+const savedPlansLibrary = document.querySelector("#savedPlansLibrary");
+const landingSavedMeta = document.querySelector("#landingSavedMeta");
 
 const planTitle = document.querySelector("#planTitle");
 const planSubtitle = document.querySelector("#planSubtitle");
@@ -31,6 +40,7 @@ const nutrition = document.querySelector("#nutrition");
 
 let deferredInstallPrompt = null;
 let currentProfile = null;
+let activeScreen = "landing";
 
 const PROFILE_KEY = "pulseplan-profile";
 const SAVED_PLANS_KEY = "pulseplan-saved-plans";
@@ -258,6 +268,21 @@ function renderPlan(profile) {
   renderSavedPlans();
 }
 
+function showScreen(name) {
+  const target = screens[name] ? name : "landing";
+  const needsPlan = target === "plan" && !currentProfile;
+  const next = needsPlan ? "setup" : target;
+
+  Object.entries(screens).forEach(([screenName, element]) => {
+    const active = screenName === next;
+    element.classList.toggle("active", active);
+    element.classList.toggle("hidden", !active);
+  });
+
+  activeScreen = next;
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
 function renderRoadmap(plan) {
   const blocks = getPhaseBlocks(plan.weeks, plan.experience.phases);
   weekRoadmap.innerHTML = blocks
@@ -399,20 +424,24 @@ function saveCurrentPlan() {
 
 function renderSavedPlans() {
   const plans = getSavedPlans();
-  savedCount.textContent =
+  const countText =
     plans.length === 0 ? "No saved plans yet" : `${plans.length} saved plan${plans.length === 1 ? "" : "s"}`;
+  savedCount.textContent = countText;
+  landingSavedMeta.textContent = countText;
 
   if (plans.length === 0) {
-    savedPlans.innerHTML = `
-      <article class="empty-saved">
-        <strong>No saved plans yet</strong>
-        <p>Create a profile, generate a plan, then save it here for quick access.</p>
-      </article>
-    `;
+    const emptyMarkup = `
+        <article class="empty-saved">
+          <strong>No saved plans yet</strong>
+          <p>Create a profile, generate a plan, then save it here for quick access.</p>
+        </article>
+      `;
+    savedPlans.innerHTML = emptyMarkup;
+    savedPlansLibrary.innerHTML = emptyMarkup;
     return;
   }
 
-  savedPlans.innerHTML = plans
+  const markup = plans
     .map((plan) => {
       const date = new Intl.DateTimeFormat(undefined, {
         month: "short",
@@ -436,6 +465,9 @@ function renderSavedPlans() {
       `;
     })
     .join("");
+
+  savedPlans.innerHTML = markup;
+  savedPlansLibrary.innerHTML = markup;
 }
 
 function loadSavedPlan(id) {
@@ -444,6 +476,8 @@ function loadSavedPlan(id) {
 
   applyProfileToForm(plan.profile);
   renderPlan(getFormState());
+  setActiveTab("tab-weekly");
+  showScreen("plan");
   showToast("Saved plan loaded");
 }
 
@@ -513,7 +547,8 @@ form.addEventListener("input", (event) => {
 form.addEventListener("submit", (event) => {
   event.preventDefault();
   renderPlan(getFormState());
-  document.querySelector("#plan").scrollIntoView({ behavior: "smooth", block: "start" });
+  setActiveTab("tab-weekly");
+  showScreen("plan");
 });
 
 resetButton.addEventListener("click", () => {
@@ -534,9 +569,33 @@ document.querySelectorAll("[data-tab-target]").forEach((link) => {
   });
 });
 
+document.querySelectorAll("[data-screen-target]").forEach((control) => {
+  control.addEventListener("click", (event) => {
+    event.preventDefault();
+    const target = control.dataset.screenTarget;
+    if (control.dataset.tabTarget) {
+      setActiveTab(control.dataset.tabTarget);
+    }
+    showScreen(target);
+  });
+});
+
 savePlanButton.addEventListener("click", saveCurrentPlan);
 
 savedPlans.addEventListener("click", (event) => {
+  const loadButton = event.target.closest("[data-load-plan]");
+  const deleteButton = event.target.closest("[data-delete-plan]");
+
+  if (loadButton) {
+    loadSavedPlan(loadButton.dataset.loadPlan);
+  }
+
+  if (deleteButton) {
+    deleteSavedPlan(deleteButton.dataset.deletePlan);
+  }
+});
+
+savedPlansLibrary.addEventListener("click", (event) => {
   const loadButton = event.target.closest("[data-load-plan]");
   const deleteButton = event.target.closest("[data-delete-plan]");
 
@@ -582,7 +641,12 @@ if ("serviceWorker" in navigator) {
 }
 
 if (!restoreProfile()) {
-  renderPlan(getFormState());
+  updateUnits();
+  renderSavedPlans();
 }
+showScreen("landing");
 
-renderSavedPlans();
+window.setTimeout(() => {
+  splashScreen.classList.add("dismissed");
+  document.body.classList.add("app-ready");
+}, 1500);
