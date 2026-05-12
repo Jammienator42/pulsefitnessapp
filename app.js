@@ -6,12 +6,17 @@ const imperialInputs = document.querySelector("#imperialInputs");
 const resetButton = document.querySelector("#resetButton");
 const installButton = document.querySelector("#installButton");
 const offlineToast = document.querySelector("#offlineToast");
+const profileNameInput = document.querySelector("#profileName");
 const heightCm = document.querySelector("#heightCm");
 const weightKg = document.querySelector("#weightKg");
 const heightFt = document.querySelector("#heightFt");
 const heightIn = document.querySelector("#heightIn");
 const weightLb = document.querySelector("#weightLb");
 const dietSelect = document.querySelector("#diet");
+const profileNameLabel = document.querySelector("#profileNameLabel");
+const savedCount = document.querySelector("#savedCount");
+const savePlanButton = document.querySelector("#savePlanButton");
+const savedPlans = document.querySelector("#savedPlans");
 
 const planTitle = document.querySelector("#planTitle");
 const planSubtitle = document.querySelector("#planSubtitle");
@@ -25,6 +30,10 @@ const guide = document.querySelector("#guide");
 const nutrition = document.querySelector("#nutrition");
 
 let deferredInstallPrompt = null;
+let currentProfile = null;
+
+const PROFILE_KEY = "pulseplan-profile";
+const SAVED_PLANS_KEY = "pulseplan-saved-plans";
 
 const experienceProfiles = {
   new: {
@@ -192,6 +201,7 @@ function getFormState() {
     units === "metric" ? Number(data.get("weightKg")) : Number(data.get("weightLb")) * 0.453592;
 
   return {
+    profileName: profileNameInput.value.trim() || "My PulsePlan",
     gender: data.get("gender"),
     experience: data.get("experience"),
     units,
@@ -233,6 +243,7 @@ function renderPlan(profile) {
 
   planTitle.textContent = `Your ${titleWeeks}`;
   planSubtitle.textContent = `${experienceLabel} level, ${genderLabel.toLowerCase()} profile, ${dietLabel.toLowerCase()} nutrition ideas, ${plan.experience.intensity} pacing. ${plan.experience.subtitle}`;
+  profileNameLabel.textContent = profile.profileName;
   minutesTarget.textContent = String(plan.minutes);
   strengthDays.textContent = String(plan.experience.strength);
   cardioDays.textContent = String(plan.experience.cardio);
@@ -242,7 +253,9 @@ function renderPlan(profile) {
   renderSchedule(plan);
   renderExamples(plan);
   renderRecipes(plan);
-  localStorage.setItem("pulseplan-profile", JSON.stringify(profile));
+  currentProfile = profile;
+  localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+  renderSavedPlans();
 }
 
 function renderRoadmap(plan) {
@@ -354,31 +367,135 @@ function showToast(message) {
   window.setTimeout(() => offlineToast.classList.remove("visible"), 2200);
 }
 
+function getSavedPlans() {
+  try {
+    return JSON.parse(localStorage.getItem(SAVED_PLANS_KEY)) || [];
+  } catch {
+    return [];
+  }
+}
+
+function setSavedPlans(plans) {
+  localStorage.setItem(SAVED_PLANS_KEY, JSON.stringify(plans));
+  renderSavedPlans();
+}
+
+function saveCurrentPlan() {
+  const profile = currentProfile || getFormState();
+  const plan = normalizeProfile(profile);
+  const plans = getSavedPlans();
+  const savedPlan = {
+    id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+    createdAt: new Date().toISOString(),
+    profile,
+    title: `${profile.profileName} - ${profile.weeks} week ${plan.experience.title}`,
+    summary: `${labelMaps.experience[profile.experience]}, ${labelMaps.diet[profile.diet]}, ${plan.minutes} min/week`
+  };
+
+  plans.unshift(savedPlan);
+  setSavedPlans(plans.slice(0, 12));
+  showToast("Plan saved to this device");
+}
+
+function renderSavedPlans() {
+  const plans = getSavedPlans();
+  savedCount.textContent =
+    plans.length === 0 ? "No saved plans yet" : `${plans.length} saved plan${plans.length === 1 ? "" : "s"}`;
+
+  if (plans.length === 0) {
+    savedPlans.innerHTML = `
+      <article class="empty-saved">
+        <strong>No saved plans yet</strong>
+        <p>Create a profile, generate a plan, then save it here for quick access.</p>
+      </article>
+    `;
+    return;
+  }
+
+  savedPlans.innerHTML = plans
+    .map((plan) => {
+      const date = new Intl.DateTimeFormat(undefined, {
+        month: "short",
+        day: "numeric",
+        year: "numeric"
+      }).format(new Date(plan.createdAt));
+
+      return `
+        <article class="saved-plan">
+          <div>
+            <strong>${escapeHtml(plan.title)}</strong>
+            <small>${escapeHtml(plan.summary)} - saved ${date}</small>
+          </div>
+          <div class="saved-plan-actions">
+            <button class="ghost-button" type="button" data-load-plan="${plan.id}">Load</button>
+            <button class="icon-button" type="button" data-delete-plan="${plan.id}" aria-label="Delete ${escapeHtml(plan.title)}">
+              <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 7h14M10 11v6m4-6v6M8 7l1-3h6l1 3m-9 0 1 13h8l1-13" /></svg>
+            </button>
+          </div>
+        </article>
+      `;
+    })
+    .join("");
+}
+
+function loadSavedPlan(id) {
+  const plan = getSavedPlans().find((item) => item.id === id);
+  if (!plan) return;
+
+  applyProfileToForm(plan.profile);
+  renderPlan(getFormState());
+  showToast("Saved plan loaded");
+}
+
+function deleteSavedPlan(id) {
+  setSavedPlans(getSavedPlans().filter((plan) => plan.id !== id));
+  showToast("Saved plan deleted");
+}
+
+function applyProfileToForm(profile) {
+  Object.entries(profile).forEach(([key, value]) => {
+    const input = form.querySelector(`[name="${key}"][value="${value}"]`);
+    if (input) input.checked = true;
+  });
+
+  profileNameInput.value = profile.profileName || "My PulsePlan";
+
+  if (profile.units === "metric") {
+    heightCm.value = Math.round(profile.height);
+    weightKg.value = Math.round(profile.weight);
+  } else {
+    const totalInches = Math.round(profile.height / 2.54);
+    heightFt.value = Math.floor(totalInches / 12);
+    heightIn.value = totalInches % 12;
+    weightLb.value = Math.round(profile.weight / 0.453592);
+  }
+
+  dietSelect.value = profile.diet;
+  weeksInput.value = profile.weeks;
+  weeksOutput.textContent = `${profile.weeks} weeks`;
+  updateUnits();
+}
+
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, (character) => {
+    const entities = {
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#039;"
+    };
+    return entities[character];
+  });
+}
+
 function restoreProfile() {
-  const saved = localStorage.getItem("pulseplan-profile");
+  const saved = localStorage.getItem(PROFILE_KEY);
   if (!saved) return false;
 
   try {
     const profile = JSON.parse(saved);
-    Object.entries(profile).forEach(([key, value]) => {
-      const input = form.querySelector(`[name="${key}"][value="${value}"]`);
-      if (input) input.checked = true;
-    });
-
-    if (profile.units === "metric") {
-      heightCm.value = Math.round(profile.height);
-      weightKg.value = Math.round(profile.weight);
-    } else {
-      const totalInches = Math.round(profile.height / 2.54);
-      heightFt.value = Math.floor(totalInches / 12);
-      heightIn.value = totalInches % 12;
-      weightLb.value = Math.round(profile.weight / 0.453592);
-    }
-
-    dietSelect.value = profile.diet;
-    weeksInput.value = profile.weeks;
-    weeksOutput.textContent = `${profile.weeks} weeks`;
-    updateUnits();
+    applyProfileToForm(profile);
     renderPlan(getFormState());
     return true;
   } catch {
@@ -403,7 +520,7 @@ resetButton.addEventListener("click", () => {
   form.reset();
   weeksOutput.textContent = "8 weeks";
   updateUnits();
-  localStorage.removeItem("pulseplan-profile");
+  localStorage.removeItem(PROFILE_KEY);
   renderPlan(getFormState());
 });
 
@@ -415,6 +532,21 @@ document.querySelectorAll("[data-tab-target]").forEach((link) => {
   link.addEventListener("click", () => {
     setActiveTab(link.dataset.tabTarget);
   });
+});
+
+savePlanButton.addEventListener("click", saveCurrentPlan);
+
+savedPlans.addEventListener("click", (event) => {
+  const loadButton = event.target.closest("[data-load-plan]");
+  const deleteButton = event.target.closest("[data-delete-plan]");
+
+  if (loadButton) {
+    loadSavedPlan(loadButton.dataset.loadPlan);
+  }
+
+  if (deleteButton) {
+    deleteSavedPlan(deleteButton.dataset.deletePlan);
+  }
 });
 
 window.addEventListener("beforeinstallprompt", (event) => {
@@ -452,3 +584,5 @@ if ("serviceWorker" in navigator) {
 if (!restoreProfile()) {
   renderPlan(getFormState());
 }
+
+renderSavedPlans();

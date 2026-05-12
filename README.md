@@ -8,6 +8,7 @@ PulsePlan is an installable progressive web app that creates beginner and advanc
 - Tailored weekly workout schedule
 - Exercise examples for the selected level
 - Diet-aware recipe suggestions
+- Local profile naming and saved plans
 - PWA manifest, service worker, offline cache, install prompt, and local profile persistence
 
 ## Run Locally
