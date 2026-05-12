@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0f1c18" />
+    <meta
+      name="description"
+      content="PulsePlan creates beginner and advanced exercise plans with simple nutrition ideas based on your profile."
+    />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" href="./assets/icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./styles.css" />
+    <title>PulsePlan</title>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="#top" aria-label="PulsePlan home">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 40 40" role="img">
+              <path d="M9 24h6l4-11 5 17 4-9h4" />
+              <circle cx="20" cy="20" r="17" />
+            </svg>
+          </span>
+          <span>PulsePlan</span>
+        </a>
+        <nav class="nav-links" aria-label="Primary navigation">
+          <a href="#plan" data-tab-target="tab-weekly">Plan</a>
+          <a href="#plan" data-tab-target="tab-recipes">Recipes</a>
+          <a href="#plan" data-tab-target="tab-examples">Guide</a>
+        </nav>
+        <button class="ghost-button install-button" id="installButton" type="button">
+          <svg aria-hidden="true" viewBox="0 0 24 24">
+            <path d="M12 3v11m0 0 4-4m-4 4-4-4M5 17v3h14v-3" />
+          </svg>
+          Install
+        </button>
+      </header>
+
+      <main id="top" class="workspace">
+        <section class="onboarding-panel" aria-labelledby="formTitle">
+          <div class="panel-heading">
+            <h1 id="formTitle">Build a plan you can actually follow.</h1>
+            <p>
+              Set your starting point and PulsePlan will shape weekly workouts,
+              example moves, and recipes around your diet preference.
+            </p>
+          </div>
+
+          <form id="planForm" class="profile-form">
+            <fieldset class="control-group">
+              <legend>Gender</legend>
+              <div class="segmented" data-control="gender">
+                <label><input type="radio" name="gender" value="woman" checked /> Woman</label>
+                <label><input type="radio" name="gender" value="man" /> Man</label>
+                <label><input type="radio" name="gender" value="nonbinary" /> Non-binary</label>
+              </div>
+            </fieldset>
+
+            <fieldset class="control-group">
+              <legend>How new are you to exercise?</legend>
+              <div class="level-grid">
+                <label class="level-card">
+                  <input type="radio" name="experience" value="new" checked />
+                  <span class="level-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M5 19 19 5M8 5h11v11" /></svg>
+                  </span>
+                  <span>
+                    <strong>New</strong>
+                    <small>Simple movement, lots of recovery</small>
+                  </span>
+                </label>
+                <label class="level-card">
+                  <input type="radio" name="experience" value="beginner" />
+                  <span class="level-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M4 17h4V9H4v8Zm6 2h4V5h-4v14Zm6-4h4V11h-4v4Z" /></svg>
+                  </span>
+                  <span>
+                    <strong>Beginner</strong>
+                    <small>Foundations with steady progress</small>
+                  </span>
+                </label>
+                <label class="level-card">
+                  <input type="radio" name="experience" value="advanced" />
+                  <span class="level-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="m4 14 5-5 4 4 7-8M4 20h16" /></svg>
+                  </span>
+                  <span>
+                    <strong>Advanced</strong>
+                    <small>More volume and intensity control</small>
+                  </span>
+                </label>
+              </div>
+            </fieldset>
+
+            <div class="unit-row" role="group" aria-label="Measurement units">
+              <span>Units</span>
+              <div class="segmented compact">
+                <label><input type="radio" name="units" value="metric" checked /> Metric</label>
+                <label><input type="radio" name="units" value="imperial" /> Imperial</label>
+              </div>
+            </div>
+
+            <div class="metric-grid" id="metricInputs">
+              <label class="field">
+                <span>Height</span>
+                <input id="heightCm" name="heightCm" type="number" min="120" max="230" value="170" />
+                <small>cm</small>
+              </label>
+              <label class="field">
+                <span>Weight</span>
+                <input id="weightKg" name="weightKg" type="number" min="35" max="250" value="72" />
+                <small>kg</small>
+              </label>
+            </div>
+
+            <div class="metric-grid hidden" id="imperialInputs" aria-hidden="true">
+              <label class="field">
+                <span>Height</span>
+                <input id="heightFt" name="heightFt" type="number" min="3" max="8" value="5" />
+                <small>ft</small>
+              </label>
+              <label class="field">
+                <span>Inches</span>
+                <input id="heightIn" name="heightIn" type="number" min="0" max="11" value="7" />
+                <small>in</small>
+              </label>
+              <label class="field">
+                <span>Weight</span>
+                <input id="weightLb" name="weightLb" type="number" min="80" max="550" value="159" />
+                <small>lb</small>
+              </label>
+            </div>
+
+            <label class="field full">
+              <span>Diet preference</span>
+              <select id="diet" name="diet">
+                <option value="omnivore">Omnivore</option>
+                <option value="vegetarian">Vegetarian</option>
+                <option value="vegan">Vegan</option>
+                <option value="pescatarian">Pescatarian</option>
+                <option value="glutenFree">Gluten-free</option>
+              </select>
+            </label>
+
+            <label class="range-field full">
+              <span>
+                Plan length
+                <output id="weeksOutput" for="weeks">8 weeks</output>
+              </span>
+              <input id="weeks" name="weeks" type="range" min="2" max="16" value="8" />
+            </label>
+
+            <div class="form-actions">
+              <button class="primary-button" type="submit">
+                <svg aria-hidden="true" viewBox="0 0 24 24">
+                  <path d="M5 12h14m-6-6 6 6-6 6" />
+                </svg>
+                Generate plan
+              </button>
+              <button class="ghost-button" id="resetButton" type="button">
+                <svg aria-hidden="true" viewBox="0 0 24 24">
+                  <path d="M4 7h11a5 5 0 1 1-3.5 8.5M4 7l4-4M4 7l4 4" />
+                </svg>
+                Reset
+              </button>
+            </div>
+          </form>
+
+          <p class="safety-note">
+            General wellness planning only. Start easy, stop for pain, and get
+            clinical advice before changing activity or diet if you have a
+            health condition, injury, pregnancy, or medication concern.
+          </p>
+        </section>
+
+        <section class="results-panel" id="plan" aria-live="polite">
+          <div class="result-hero">
+            <div>
+              <h2 id="planTitle">Your 8-week foundation plan</h2>
+              <p id="planSubtitle">
+                Low-friction workouts with simple progression and recipes that
+                support consistent energy.
+              </p>
+            </div>
+            <div class="score-ring" aria-label="Weekly activity target">
+              <span id="minutesTarget">120</span>
+              <small>min/week</small>
+            </div>
+          </div>
+
+          <div class="stat-strip" aria-label="Plan summary">
+            <div>
+              <span id="strengthDays">2</span>
+              <small>strength days</small>
+            </div>
+            <div>
+              <span id="cardioDays">3</span>
+              <small>cardio days</small>
+            </div>
+            <div>
+              <span id="recoveryDays">2</span>
+              <small>recovery days</small>
+            </div>
+          </div>
+
+          <div class="tabs" role="tablist" aria-label="Plan sections">
+            <button class="tab active" id="tab-weekly" type="button" role="tab" aria-selected="true" aria-controls="weeklyPanel">
+              Weekly plan
+            </button>
+            <button class="tab" id="tab-examples" type="button" role="tab" aria-selected="false" aria-controls="examplesPanel">
+              Examples
+            </button>
+            <button class="tab" id="tab-recipes" type="button" role="tab" aria-selected="false" aria-controls="recipesPanel">
+              Recipes
+            </button>
+          </div>
+
+          <div class="tab-panel" id="weeklyPanel" role="tabpanel" aria-labelledby="tab-weekly">
+            <div class="week-roadmap" id="weekRoadmap"></div>
+            <div class="day-plan" id="dayPlan"></div>
+          </div>
+
+          <div class="tab-panel hidden" id="examplesPanel" role="tabpanel" aria-labelledby="tab-examples">
+            <div class="guide-grid" id="guide"></div>
+          </div>
+
+          <div class="tab-panel hidden" id="recipesPanel" role="tabpanel" aria-labelledby="tab-recipes">
+            <div class="recipe-grid" id="nutrition"></div>
+          </div>
+
+          <aside class="source-note">
+            Built around public activity guidance from
+            <a href="https://www.cdc.gov/physical-activity-basics/guidelines/adults.html" target="_blank" rel="noreferrer">CDC</a>,
+            gradual progression principles from
+            <a href="https://www.ncbi.nlm.nih.gov/books/NBK566046/" target="_blank" rel="noreferrer">WHO</a>,
+            and diet variety ideas from
+            <a href="https://www.myplate.gov/web/tip-sheet/enjoy-vegetarian-meals" target="_blank" rel="noreferrer">MyPlate</a>.
+          </aside>
+        </section>
+      </main>
+    </div>
+    <div class="offline-toast" id="offlineToast" role="status">Ready offline</div>
+    <script src="./app.js" type="module"></script>
+  </body>
+</html>

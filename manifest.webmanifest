@@ -1,0 +1,47 @@
+{
+  "name": "PulsePlan Fitness Planner",
+  "short_name": "PulsePlan",
+  "description": "Personalized beginner and advanced exercise plans with diet-aware recipe ideas.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6f8f5",
+  "theme_color": "#0f1c18",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "./assets/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Build a plan",
+      "short_name": "Plan",
+      "description": "Open the profile form.",
+      "url": "./index.html#top",
+      "icons": [
+        {
+          "src": "./assets/icon.svg",
+          "sizes": "any",
+          "type": "image/svg+xml"
+        }
+      ]
+    },
+    {
+      "name": "View recipes",
+      "short_name": "Recipes",
+      "description": "Jump to nutrition ideas.",
+      "url": "./index.html#nutrition",
+      "icons": [
+        {
+          "src": "./assets/icon.svg",
+          "sizes": "any",
+          "type": "image/svg+xml"
+        }
+      ]
+    }
+  ]
+}
